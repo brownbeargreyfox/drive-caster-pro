@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Cast videos from Google Drive to Chromecast with full media controls">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Drive Caster">
+    <title>Drive Caster Pro - Cast from Google Drive</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI2IiBmaWxsPSIjNjY3ZWVhIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjE4IiByPSIyIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik04IDIyIFExMiAyMiAxNCAyMCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+PHJlY3QgeD0iMTYiIHk9IjEyIiB3aWR0aD0iMTIiIGhlaWdodD0iOCIgcng9IjEiIGZpbGw9IndoaXRlIi8+PC9zdmc+">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .pro-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .auth-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .setup-steps {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setup-steps h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .setup-steps ol {
+            padding-left: 20px;
+        }
+
+        .setup-steps li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .code {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-family: monospace;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.cast-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .btn.google-btn {
+            background: linear-gradient(45deg, #4285f4, #34a853);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+
+        .status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+
+        .status.info {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.5);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .video-list {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .breadcrumb-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .video-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .video-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .folder-item {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-icon {
+            font-size: 1.5rem;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .item-meta {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .cast-button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .cast-button:hover {
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cast-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: none;
+        }
+
+        .install-prompt:hover {
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .video-item {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .cast-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Drive Caster</h1>
+            <div class="pro-badge">PRO</div>
+            <p>Cast videos from Google Drive to Chromecast</p>
+        </div>
+
+        <div class="auth-section">
+            <div class="setup-steps">
+                <h3>🔧 OAuth Setup (One-time):</h3>
+                <ol>
+                    <li>Go to <a href="https://console.developers.google.com" target="_blank" style="color: #ffd700;">Google Cloud Console</a></li>
+                    <li>Create a new project (e.g., "Drive Caster")</li>
+                    <li>Enable these APIs:
+                        <div class="code">Google Drive API</div>
+                    </li>
+                    <li>Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"</li>
+                    <li>Application type: "Web application"</li>
+                    <li>Add authorized origins:
+                        <div class="code">http://localhost:8000</div>
+                        <div class="code">https://yourusername.github.io</div>
+                    </li>
+                    <li>Copy your Client ID and paste below</li>
+                </ol>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Google OAuth Client ID:</label>
+                <input type="text" id="clientId" class="api-input" placeholder="123456789-abcdefg.apps.googleusercontent.com">
+            </div>
+
+            <button id="authBtn" class="btn google-btn">🔐 Sign in with Google</button>
+            <button id="findCastBtn" class="btn cast-btn" style="display: none;">📺 Find Chromecast</button>
+            <button id="signOutBtn" class="btn" style="display: none; background: #666;">Sign Out</button>
+        </div>
+
+        <div id="userInfo" class="user-info"></div>
+        <div id="status"></div>
+        <div id="videoList" style="display: none;"></div>
+        <div id="castControls" style="display: none;"></div>
+
+        <!-- PWA Install Prompt -->
+        <div id="installPrompt" class="install-prompt">
+            📱 Install Drive Caster as an app
+        </div>
+    </div>
+
+    <script>
+        let gapi;
+        let castSession = null;
+        let currentMedia = null;
+        let currentFolder = 'root';
+        let folderStack = [{ id: 'root', name: 'My Drive' }];
+        let allFiles = [];
+        let filteredFiles = [];
+        let deferredPrompt;
+
+        // Load Google API
+        function loadGoogleAPI() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = () => {
+                    gapi = window.gapi;
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Initialize Cast API
+        function initializeCastApi() {
+            const script = document.createElement('script');
+            script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+            document.head.appendChild(script);
+            
+            window['__onGCastApiAvailable'] = function(isAvailable) {
+                if (isAvailable) {
+                    const context = cast.framework.CastContext.getInstance();
+                    context.setOptions({
+                        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                    });
+                    
+                    context.addEventListener(
+                        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                        (event) => {
+                            switch (event.sessionState) {
+                                case cast.framework.SessionState.SESSION_STARTED:
+                                    castSession = context.getCurrentSession();
+                                    showStatus('✅ Connected to Chromecast!', 'success');
+                                    break;
+                                case cast.framework.SessionState.SESSION_ENDED:
+                                    castSession = null;
+                                    currentMedia = null;
+                                    showStatus('📱 Disconnected from Chromecast', 'info');
+                                    document.getElementById('castControls').style.display = 'none';
+                                    break;
+                            }
+                        }
+                    );
+                }
+            };
+        }
+
+        // Show status messages
+        function showStatus(message, type = '') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Initialize Google Drive API with OAuth
+        async function initGoogleDrive(clientId) {
+            return new Promise((resolve, reject) => {
+                gapi.load('client:auth2', async () => {
+                    try {
+                        await gapi.client.init({
+                            clientId: clientId,
+                            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                            scope: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.profile'
+                        });
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        // Sign in to Google
+        async function signIn() {
+            const authInstance = gapi.auth2.getAuthInstance();
+            try {
+                await authInstance.signIn();
+                const user = authInstance.currentUser.get();
+                const profile = user.getBasicProfile();
+                
+                showUserInfo({
+                    name: profile.getName(),
+                    email: profile.getEmail(),
+                    image: profile.getImageUrl()
+                });
+                
+                document.getElementById('authBtn').style.display = 'none';
+                document.getElementById('findCastBtn').style.display = 'block';
+                document.getElementById('signOutBtn').style.display = 'block';
+                
+                showStatus('✅ Signed in successfully!', 'success');
+                await loadFiles();
+                
+            } catch (error) {
+                showStatus('❌ Sign in failed: ' + error.error, 'error');
+            }
+        }
+
+        // Show user info
+        function showUserInfo(user) {
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `
+                <img src="${user.image}" alt="Profile" class="user-avatar">
+                <div>
+                    <div style="font-weight: 600;">${user.name}</div>
+                    <div style="opacity: 0.7; font-size: 0.9rem;">${user.email}</div>
+                </div>
+                <div style="margin-left: auto; color: #4ade80;">● Connected</div>
+            `;
+            userInfoDiv.style.display = 'flex';
+        }
+
+        // Load files from current folder
+        async function loadFiles(folderId = 'root') {
+            showStatus('📂 Loading files...', 'info');
+            
+            try {
+                // Get folders
+                const foldersResponse = await gapi.client.drive.files.list({
+                    q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+                    fields: 'files(id,name,modifiedTime)',
+                    orderBy: 'name'
+                });
+
+                // Get videos
+                const videosResponse = await gapi.client.drive.files.list({
+                    q: `'${folderId}' in parents and mimeType contains 'video/' and trashed=false`,
+                    fields: 'files(id,name,size,mimeType,modifiedTime)',
+                    orderBy: 'modifiedTime desc'
+                });
+
+                const folders = foldersResponse.result.files || [];
+                const videos = videosResponse.result.files || [];
+                
+                allFiles = [...folders, ...videos];
+                filteredFiles = allFiles;
+                
+                displayFileList(filteredFiles);
+                updateBreadcrumb();
+                
+                const videoCount = videos.length;
+                const folderCount = folders.length;
+                showStatus(`📁 ${folderCount} folders, 🎬 ${videoCount} videos`, 'success');
+                
+            } catch (error) {
+                showStatus('❌ Error loading files: ' + error.message, 'error');
+            }
+        }
+
+        // Update breadcrumb navigation
+        function updateBreadcrumb() {
+            const videoListDiv = document.getElementById('videoList');
+            
+            let breadcrumbHtml = '<div class="breadcrumb">';
+            folderStack.forEach((folder, index) => {
+                breadcrumbHtml += `
+                    <div class="breadcrumb-item" onclick="navigateToFolder('${folder.id}', ${index})">
+                        ${index === 0 ? '🏠' : '📁'} ${folder.name}
+                    </div>
+                `;
+            });
+            breadcrumbHtml += '</div>';
+            
+            const searchHtml = `
+                <input type="text" class="search-box" placeholder="🔍 Search videos and folders..." 
+                       oninput="filterFiles(this.value)">
+            `;
+            
+            videoListDiv.innerHTML = breadcrumbHtml + searchHtml + '<div id="fileListContainer"></div>';
+            videoListDiv.style.display = 'block';
+        }
+
+        // Navigate to folder
+        async function navigateToFolder(folderId, breadcrumbIndex = -1) {
+            if (breadcrumbIndex >= 0) {
+                folderStack = folderStack.slice(0, breadcrumbIndex + 1);
+            }
+            
+            currentFolder = folderId;
+            await loadFiles(folderId);
+        }
+
+        // Filter files based on search
+        function filterFiles(searchTerm) {
+            if (!searchTerm.trim()) {
+                filteredFiles = allFiles;
+            } else {
+                const term = searchTerm.toLowerCase();
+                filteredFiles = allFiles.filter(file => 
+                    file.name.toLowerCase().includes(term)
+                );
+            }
+            displayFileList(filteredFiles);
+        }
+
+        // Display file list
+        function displayFileList(files) {
+            const container = document.getElementById('fileListContainer');
+            
+            if (files.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 40px;">No files found</p>';
+                return;
+            }
+
+            let html = '';
+            
+            files.forEach(file => {
+                const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+                const isVideo = file.mimeType && file.mimeType.includes('video/');
+                
+                if (!isFolder && !isVideo) return;
+                
+                const size = file.size ? formatFileSize(file.size) : '';
+                const modifiedDate = file.modifiedTime ? new Date(file.modifiedTime).toLocaleDateString() : '';
+                const icon = isFolder ? '📁' : '🎬';
+                
+                html += `
+                    <div class="video-item ${isFolder ? 'folder-item' : ''}" 
+                         ${isFolder ? `onclick="openFolder('${file.id}', '${file.name}')"` : ''}>
+                        <div class="item-info">
+                            <div class="item-icon">${icon}</div>
+                            <div class="item-details">
+                                <div class="item-name">${file.name}</div>
+                                <div class="item-meta">
+                                    ${size && !isFolder ? size + ' • ' : ''}${modifiedDate}
+                                    ${isFolder ? ' • Folder' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${!isFolder ? `
+                            <button class="cast-button" onclick="castVideo('${file.id}', '${file.name}', '${file.mimeType}')">
+                                Cast 📺
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Open folder
+        async function openFolder(folderId, folderName) {
+            folderStack.push({ id: folderId, name: folderName });
+            await navigateToFolder(folderId);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 B';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Cast video to Chromecast
+        async function castVideo(fileId, fileName, mimeType) {
+            if (!castSession) {
+                showStatus('❌ Please connect to Chromecast first', 'error');
+                return;
+            }
+
+            try {
+                showStatus('🎬 Preparing to cast...', 'info');
+                
+                // Get the file's webContentLink for better compatibility
+                const fileResponse = await gapi.client.drive.files.get({
+                    fileId: fileId,
+                    fields: 'webContentLink'
+                });
+                
+                let videoUrl;
+                if (fileResponse.result.webContentLink) {
+                    videoUrl = fileResponse.result.webContentLink;
+                } else {
+                    const accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+                    videoUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&access_token=${accessToken}`;
+                }
+                
+                const mediaInfo = new chrome.cast.media.MediaInfo(videoUrl, mimeType);
+                mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
+                mediaInfo.metadata.title = fileName;
+                mediaInfo.metadata.subtitle = 'From Google Drive';
+
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                
+                const remoteMediaClient = castSession.getRemoteMediaClient();
+                
+                remoteMediaClient.loadMedia(request).then(
+                    () => {
+                        showStatus(`🎬 Now casting: ${fileName}`, 'success');
+                        showCastControls(fileName);
+                        currentMedia = remoteMediaClient.getMediaSession();
+                    },
+                    (error) => {
+                        showStatus('❌ Failed to cast: ' + error.description, 'error');
+                    }
+                );
+            } catch (error) {
+                showStatus('❌ Error preparing video: ' + error.message, 'error');
+            }
+        }
+
+        // Show cast controls
+        function showCastControls(fileName) {
+            const controlsDiv = document.getElementById('castControls');
+            controlsDiv.innerHTML = `
+                <div class="now-playing">
+                    <h3>🎬 Now Playing</h3>
+                    <div style="font-weight: 600; margin-top: 10px;">${fileName}</div>
+                    <div style="opacity: 0.7; margin-top: 5px;">Casting to ${castSession.getCastDevice().friendlyName}</div>
+                </div>
+                
+                <div class="control-buttons" style="display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+                    <button class="control-btn" onclick="controlPlayback('play')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">▶️ Play</button>
+                    <button class="control-btn" onclick="controlPlayback('pause')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">⏸️ Pause</button>
+                    <button class="control-btn" onclick="controlPlayback('stop')" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">⏹️ Stop</button>
+                    <button class="control-btn" onclick="disconnectCast()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">🔌 Disconnect</button>
+                </div>
+            `;
+            controlsDiv.style.display = 'block';
+        }
+
+        // Control playback
+        function controlPlayback(action) {
+            if (!castSession) return;
+            
+            const remoteMediaClient = castSession.getRemoteMediaClient();
+            if (!remoteMediaClient) return;
+
+            switch (action) {
+                case 'play':
+                    remoteMediaClient.play();
+                    showStatus('▶️ Playing', 'info');
+                    break;
+                case 'pause':
+                    remoteMediaClient.pause();
+                    showStatus('⏸️ Paused', 'info');
+                    break;
+                case 'stop':
+                    remoteMediaClient.stop();
+                    showStatus('⏹️ Stopped', 'info');
+                    break;
+            }
+        }
+
+        // Disconnect from Chromecast
+        function disconnectCast() {
+            const context = cast.framework.CastContext.getInstance();
+            const session = context.getCurrentSession();
+            if (session) {
+                session.endSession(true);
+            }
+        }
+
+        // Sign out
+        function signOut() {
+            const authInstance = gapi.auth2.getAuthInstance();
+            authInstance.signOut().then(() => {
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('videoList').style.display = 'none';
+                document.getElementById('castControls').style.display = 'none';
+                document.getElementById('authBtn').style.display = 'block';
+                document.getElementById('findCastBtn').style.display = 'none';
+                document.getElementById('signOutBtn').style.display = 'none';
+                showStatus('👋 Signed out', 'info');
+            });
+        }
+
+        // Event listeners
+        document.getElementById('authBtn').addEventListener('click', async () => {
+            const clientId = document.getElementById('clientId').value.trim();
+            
+            if (!clientId) {
+                showStatus('❌ Please enter your OAuth Client ID', 'error');
+                return;
+            }
+
+            try {
+                showStatus('🔐 Connecting to Google...', 'info');
+                await initGoogleDrive(clientId);
+                await signIn();
+                
+            } catch (error) {
+                showStatus('❌ Connection failed: ' + error.message, 'error');
+            }
+        });
+
+        document.getElementById('findCastBtn').addEventListener('click', () => {
+            const context = cast.framework.CastContext.getInstance();
+            context.requestSession();
+        });
+
+        document.getElementById('signOutBtn').addEventListener('click', signOut);
+
+        // PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').style.display = 'block';
+        });
+
+        document.getElementById('installPrompt').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showStatus('🎉 App installed successfully!', 'success');
+                }
+                deferredPrompt = null;
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+        });
+
+        // Initialize everything
+        async function init() {
+            await loadGoogleAPI();
+            initializeCastApi();
+        }
+
+        init();
+
+        console.log('🎬 Drive Caster Pro loaded successfully!');
+    </script>
+
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
