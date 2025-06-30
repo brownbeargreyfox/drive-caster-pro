@@ -39,6 +39,7 @@
         .header { position: relative; text-align: center; margin-bottom: 30px; }
         h1 { font-size: 2.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         h3 { color: var(--accent-color); margin-bottom: 15px; }
+        .input-group { margin-bottom: 20px; }
         input { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; background: var(--input-bg); color: var(--input-text-color); }
         .btn { background: #4285f4; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: transform 0.2s; }
         .btn:hover { transform: translateY(-2px); }
@@ -62,6 +63,9 @@
         .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 16px; left: 4px; position: absolute; transition: .4s; width: 16px; border-radius: 50%; }
         input:checked + .slider { background-color: #4285f4; }
         input:checked + .slider:before { transform: translateX(24px); }
+        .app-footer { text-align: center; padding: 20px; font-size: 0.9em; opacity: 0.7; }
+        .app-footer a { color: var(--accent-color); font-weight: 600; text-decoration: none; }
+        .app-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -78,10 +82,15 @@
         <div id="authCard" class="card">
             <h3>Setup</h3>
             <div class="input-group">
-                <label for="clientId">Google OAuth Client ID:</label>
+                <label for="clientId" style="display:block; margin-bottom:8px;">Google OAuth Client ID:</label>
                 <input type="text" id="clientId" placeholder="Paste your Web App Client ID">
             </div>
             <button id="authBtn" class="btn">🔐 Sign In with Google</button>
+            <div style="margin-top: 15px; text-align: center;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="customKeyToggle"> Use my own OAuth Client ID
+                </label>
+            </div>
         </div>
         <div id="mainApp" style="display:none;">
             <div id="browserCard" class="card">
@@ -92,11 +101,19 @@
             <div id="cast_button_container"></div>
         </div>
     </div>
-    
+
+    <footer class="app-footer">
+        ❤️ Enjoying Drive Caster? <a href="https://www.buymeacoffee.com/YOURNAME" target="_blank">Support this project</a>
+    </footer>
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" async defer></script>
     <script>
+        // --- START CONFIGURATION ---
+        const DEFAULT_CLIENT_ID = "YOUR_DEFAULT_CLIENT_ID.apps.googleusercontent.com"; // <-- PASTE YOUR FALLBACK KEY HERE
+        // --- END CONFIGURATION ---
+
         const authCard = document.getElementById('authCard');
         const mainApp = document.getElementById('mainApp');
         const clientIdInput = document.getElementById('clientId');
@@ -110,7 +127,6 @@
         let castSession;
         let folderStack = [{ id: 'root', name: 'My Drive' }];
 
-        // --- THEME LOGIC ---
         const applyTheme = (theme) => {
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark-theme');
@@ -120,17 +136,31 @@
                 themeToggle.checked = false;
             }
         };
-        themeToggle.addEventListener('change', () => {
-            const newTheme = themeToggle.checked ? 'dark' : 'light';
-            localStorage.setItem('driveCasterTheme', newTheme);
-            applyTheme(newTheme);
-        });
 
-        // --- APP INITIALIZATION ---
         window.onload = () => {
-            clientIdInput.value = localStorage.getItem('driveCasterClientId') || '';
+            const customKeyToggle = document.getElementById("customKeyToggle");
+            const savedClientId = localStorage.getItem('driveCasterClientId');
             const savedTheme = localStorage.getItem('driveCasterTheme') || 'light';
             applyTheme(savedTheme);
+
+            if (savedClientId) {
+                clientIdInput.value = savedClientId;
+                customKeyToggle.checked = true;
+                document.querySelector('.input-group').style.display = 'block';
+            } else {
+                customKeyToggle.checked = false;
+                document.querySelector('.input-group').style.display = 'none';
+            }
+
+            customKeyToggle.addEventListener("change", () => {
+                document.querySelector('.input-group').style.display = customKeyToggle.checked ? "block" : "none";
+            });
+
+            themeToggle.addEventListener('change', () => {
+                const newTheme = themeToggle.checked ? 'dark' : 'light';
+                localStorage.setItem('driveCasterTheme', newTheme);
+                applyTheme(newTheme);
+            });
 
             authBtn.addEventListener('click', handleAuthClick);
             signOutBtn.addEventListener('click', handleSignOutClick);
@@ -140,11 +170,20 @@
             }
         };
         
-        // --- AUTHENTICATION ---
         function handleAuthClick() {
-            const clientId = clientIdInput.value;
-            if (!clientId) { alert('Please enter a Client ID.'); return; }
-            localStorage.setItem('driveCasterClientId', clientId);
+            const useCustom = document.getElementById("customKeyToggle").checked;
+            const clientId = useCustom ? clientIdInput.value.trim() : DEFAULT_CLIENT_ID;
+
+            if (!clientId || clientId === "YOUR_DEFAULT_CLIENT_ID.apps.googleusercontent.com") {
+                alert("Please provide a custom Client ID or set up the default fallback key in the code.");
+                return;
+            }
+
+            if (useCustom) {
+                localStorage.setItem("driveCasterClientId", clientId);
+            } else {
+                localStorage.removeItem("driveCasterClientId");
+            }
 
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: clientId,
@@ -172,7 +211,6 @@
             loadFiles(folderStack[folderStack.length - 1].id);
         }
         
-        // --- CAST & DRIVE API ---
         function initializeCastApi() {
             if (window.cast && cast.framework) {
                 cast.framework.CastContext.getInstance().setOptions({
