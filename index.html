@@ -4,38 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drive Caster Pro</title>
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#4a5568" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="description" content="Cast videos from Google Drive to your Chromecast.">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDQ4NCA0ODQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNzY0YmEyIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjQ4NCIgaGVpZ2h0PSI0ODQiIHJ4PSI5NiIgZmlsbD0idXJsKCNhKSIvPjx0ZXh0IHg9IjI0MiIgeT0iMjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+OrDwvdGV4dD48dGV4dCB4PSIyNDIiIHk9IjM4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQ4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RHJpdmU8L3RleHQ+PC9zdmc+">
     <style>
-        :root { --accent-color: #667eea; --accent-color-dark: #764ba2; --text-color: #ffffff; --card-bg: rgba(255, 255, 255, 0.1); }
+        :root {
+            --bg-grad-start: #667eea;
+            --bg-grad-end: #764ba2;
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --item-hover-bg: rgba(255, 255, 255, 0.2);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-text-color: #333;
+            --accent-color: #ffd700;
+        }
+
+        html.dark-theme {
+            --bg-grad-start: #2d3748;
+            --bg-grad-end: #1a202c;
+            --text-color: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --item-hover-bg: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-text-color: #e2e8f0;
+            --accent-color: #63b3ed;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-dark) 100%); min-height: 100vh; color: var(--text-color); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%); min-height: 100vh; color: var(--text-color); transition: background 0.3s ease; }
         .container { max-width: 700px; margin: 0 auto; padding: 20px; }
-        .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.2); }
-        h1 { text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        h3 { color: #ffd700; margin-bottom: 15px; }
-        .input-group { margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; background: rgba(255, 255, 255, 0.9); color: #333; }
+        .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .header { position: relative; text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        h3 { color: var(--accent-color); margin-bottom: 15px; }
+        input { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; background: var(--input-bg); color: var(--input-text-color); }
         .btn { background: #4285f4; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: transform 0.2s; }
         .btn:hover { transform: translateY(-2px); }
-        .btn#signOutBtn { background: #666; }
+        .btn#signOutBtn { background: #666; margin-bottom: 10px; }
         #cast_button_container { margin-top: 10px; }
         google-cast-button { --google-cast-button-background-color: #4ecdc4; width: 100%; height: 50px; border-radius: 10px; }
         .item { background: var(--card-bg); border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: background 0.2s; }
-        .item:hover { background: rgba(255, 255, 255, 0.2); }
+        .item:hover { background: var(--item-hover-bg); }
         .item-name { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        #breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        #breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; align-items: center; }
         #breadcrumb div { cursor: pointer; }
         #breadcrumb div:hover { text-decoration: underline; }
         .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #fff; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .back-btn { font-weight: 600; background: rgba(255, 255, 255, 0.15); padding: 8px 12px; border-radius: 8px; cursor: pointer; margin-right: 10px; }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .theme-switch-wrapper { display: flex; align-items: center; justify-content: center; position: absolute; top: 10px; right: 10px; }
+        .theme-switch { display: inline-block; height: 24px; position: relative; width: 48px; }
+        .theme-switch input { display:none; }
+        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; border-radius: 24px; }
+        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 16px; left: 4px; position: absolute; transition: .4s; width: 16px; border-radius: 50%; }
+        input:checked + .slider { background-color: #4285f4; }
+        input:checked + .slider:before { transform: translateX(24px); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Drive Caster</h1>
+        <div class="header">
+            <h1>🎬 Drive Caster</h1>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-checkbox">
+                    <input type="checkbox" id="theme-checkbox" />
+                    <div class="slider"></div>
+                </label>
+            </div>
+        </div>
         <div id="authCard" class="card">
             <h3>Setup</h3>
             <div class="input-group">
@@ -45,19 +84,18 @@
             <button id="authBtn" class="btn">🔐 Sign In with Google</button>
         </div>
         <div id="mainApp" style="display:none;">
-            <button id="signOutBtn" class="btn">Sign Out</button>
-            <div id="cast_button_container"></div>
-            <div id="browserCard" class="card" style="margin-top:20px;">
+            <div id="browserCard" class="card">
                 <div id="breadcrumb"></div>
                 <div id="fileList"></div>
             </div>
+            <button id="signOutBtn" class="btn">Sign Out</button>
+            <div id="cast_button_container"></div>
         </div>
     </div>
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" async defer></script>
-
     <script>
         const authCard = document.getElementById('authCard');
         const mainApp = document.getElementById('mainApp');
@@ -66,58 +104,62 @@
         const signOutBtn = document.getElementById('signOutBtn');
         const fileListDiv = document.getElementById('fileList');
         const breadcrumbDiv = document.getElementById('breadcrumb');
+        const themeToggle = document.getElementById('theme-checkbox');
         
-        let gapiClient;
         let tokenClient;
         let castSession;
         let folderStack = [{ id: 'root', name: 'My Drive' }];
 
+        // --- THEME LOGIC ---
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+                themeToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+                themeToggle.checked = false;
+            }
+        };
+        themeToggle.addEventListener('change', () => {
+            const newTheme = themeToggle.checked ? 'dark' : 'light';
+            localStorage.setItem('driveCasterTheme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // --- APP INITIALIZATION ---
         window.onload = () => {
             clientIdInput.value = localStorage.getItem('driveCasterClientId') || '';
+            const savedTheme = localStorage.getItem('driveCasterTheme') || 'light';
+            applyTheme(savedTheme);
+
             authBtn.addEventListener('click', handleAuthClick);
             signOutBtn.addEventListener('click', handleSignOutClick);
-            // The GIS and GAPI scripts are loaded async, so we wait for them.
-            // The actual initialization will happen on button click.
+            
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Registered', reg)).catch(err => console.error('SW Reg Error', err));
+                navigator.serviceWorker.register('./sw.js');
             }
         };
         
+        // --- AUTHENTICATION ---
         function handleAuthClick() {
             const clientId = clientIdInput.value;
             if (!clientId) { alert('Please enter a Client ID.'); return; }
             localStorage.setItem('driveCasterClientId', clientId);
 
-            // 1. Initialize the token client for getting Drive access
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: clientId,
                 scope: 'https://www.googleapis.com/auth/drive.readonly',
                 callback: (tokenResponse) => {
-                    // This function is called when the user grants permission
                     if (tokenResponse && tokenResponse.access_token) {
-                        // Set the access token for all future GAPI requests
                         gapi.client.setToken(tokenResponse);
-                        // Now that we have a token, we can load the Drive API
-                        loadDriveApiAndShowUI();
+                        gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest').then(updateUiForSignIn);
                     }
                 },
             });
-
-            // 2. Load GAPI client and then request a token
-            gapi.load('client', () => {
-                gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest').then(() => {
-                    // Ask the user for permission to access their Drive
-                    tokenClient.requestAccessToken();
-                });
-            });
-        }
-
-        function loadDriveApiAndShowUI() {
-            updateUiForSignIn();
+            tokenClient.requestAccessToken();
         }
 
         function handleSignOutClick() {
-            // There's no formal sign-out with the new library, we just clear the state
             gapi.client.setToken(null);
             authCard.style.display = 'block';
             mainApp.style.display = 'none';
@@ -126,10 +168,11 @@
         function updateUiForSignIn() {
             authCard.style.display = 'none';
             mainApp.style.display = 'block';
-            initializeCastApi(); // Initialize cast now that user is signed in
+            initializeCastApi();
             loadFiles(folderStack[folderStack.length - 1].id);
         }
         
+        // --- CAST & DRIVE API ---
         function initializeCastApi() {
             if (window.cast && cast.framework) {
                 cast.framework.CastContext.getInstance().setOptions({
@@ -138,10 +181,8 @@
                 });
                 const castButton = document.createElement('google-cast-button');
                 const container = document.getElementById('cast_button_container');
-                container.innerHTML = ''; // Clear previous button if any
+                container.innerHTML = ''; 
                 container.appendChild(castButton);
-            } else {
-                console.error("Cast framework not available yet");
             }
         }
 
@@ -156,7 +197,6 @@
                 });
                 displayFileList(response.result.files || []);
             } catch (error) {
-                console.error('File Load Error:', error);
                 fileListDiv.innerText = 'Error loading files.';
             }
         }
@@ -181,6 +221,13 @@
 
         function updateBreadcrumb() {
             breadcrumbDiv.innerHTML = '';
+            if (folderStack.length > 1) {
+                const backButton = document.createElement('div');
+                backButton.className = 'back-btn';
+                backButton.innerText = '⬅️ Back';
+                backButton.onclick = () => navigateToBreadcrumb(folderStack.length - 2);
+                breadcrumbDiv.appendChild(backButton);
+            }
             folderStack.forEach((folder, index) => {
                 const crumb = document.createElement('div');
                 crumb.innerText = folder.name + (index < folderStack.length - 1 ? ' >' : '');
@@ -197,7 +244,6 @@
         function castVideo(fileId, fileName) {
             castSession = cast.framework.CastContext.getInstance().getCurrentSession();
             if (!castSession) { alert('Connect to a Chromecast first!'); return; }
-            
             const accessToken = gapi.client.getToken().access_token;
             const videoUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
             const mediaInfo = new chrome.cast.media.MediaInfo(videoUrl, 'video/mp4');
@@ -205,7 +251,7 @@
             mediaInfo.metadata.title = fileName;
             mediaInfo.customData = { "headers": { "Authorization": "Bearer " + accessToken } };
             const request = new chrome.cast.media.LoadRequest(mediaInfo);
-            castSession.loadMedia(request).then(() => console.log('Casting...'), (err) => console.error('Cast Error', err));
+            castSession.loadMedia(request);
         }
     </script>
 </body>
